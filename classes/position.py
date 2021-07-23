@@ -1,8 +1,8 @@
-Left = 200
-Centre = 350
-Right = 500
-Top = 200
-Middle = 350
-Bottom = 500
-Height = 100
-Width = 100
+LEFT = 200
+CENTRE = 350
+RIGHT = 500
+TOP = 200
+MIDDLE = 350
+BOTTOM = 500
+HEIGHT = 100
+WIDTH = 100

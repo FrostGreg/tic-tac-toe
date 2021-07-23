@@ -3,375 +3,370 @@ import random
 from classes import colours
 from classes import position
 
-pygame.init()
-# region 'Variables'
-display_height = 800
-display_width = 800
-gameDisplay = pygame.display.set_mode((display_width, display_height))
-pygame.display.set_caption("Tic Tac Toe")
 
-PlayerCrossturn = True
-gameMode = "1V1"
-difficulty = "Easy"
+class TicTacToe:
+    def __init__(self):
+        pygame.init()
+        # region 'Variables'
+        display_height = 800
+        display_width = 800
+        self.game_display = pygame.display.set_mode((display_width, display_height))
+        pygame.display.set_caption("Tic Tac Toe")
 
-active = ['TL', 'TC', 'TR',
-          'ML', 'MC', 'MR',
-          'BL', 'BC', 'BR']  # List of each active grid piece
+        self.is_cross_turn = True
+        self.game_mode = "1V1"
+        self.difficulty = "Easy"
+        self.pick = ""
 
-GridData = {  # Dictionary that defines the positions of each grid square
-    "TL": {"Xpos": position.Left, "Ypos": position.Top},
-    "TC": {"Xpos": position.Centre, "Ypos": position.Top},
-    "TR": {"Xpos": position.Right, "Ypos": position.Top},
+        self.active_grid = ['TL', 'TC', 'TR',
+                            'ML', 'MC', 'MR',
+                            'BL', 'BC', 'BR']  # List of each active_grid grid piece
 
-    "ML": {"Xpos": position.Left, "Ypos": position.Middle},
-    "MC": {"Xpos": position.Centre, "Ypos": position.Middle},
-    "MR": {"Xpos": position.Right, "Ypos": position.Middle},
+        self.grid_positions = {  # Dictionary that defines the positions of each grid square
+            "TL": {"x_pos": position.LEFT, "y_pos": position.TOP},
+            "TC": {"x_pos": position.CENTRE, "y_pos": position.TOP},
+            "TR": {"x_pos": position.RIGHT, "y_pos": position.TOP},
 
-    "BL": {"Xpos": position.Left, "Ypos": position.Bottom},
-    "BC": {"Xpos": position.Centre, "Ypos": position.Bottom},
-    "BR": {"Xpos": position.Right, "Ypos": position.Bottom}
-}
+            "ML": {"x_pos": position.LEFT, "y_pos": position.MIDDLE},
+            "MC": {"x_pos": position.CENTRE, "y_pos": position.MIDDLE},
+            "MR": {"x_pos": position.RIGHT, "y_pos": position.MIDDLE},
 
-positions = ["T", "M", "B", "L", "C", "R"]
+            "BL": {"x_pos": position.LEFT, "y_pos": position.BOTTOM},
+            "BC": {"x_pos": position.CENTRE, "y_pos": position.BOTTOM},
+            "BR": {"x_pos": position.RIGHT, "y_pos": position.BOTTOM}
+        }
 
-Xsquare = []
-Osquare = []  # Initialising lists that define if a square is taken by X or O
+        self.positions = ["T", "M", "B", "L", "C", "R"]
 
-XWin = False
-OWin = False
-TurnCount = 0
+        self.x_square = []
+        self.o_square = []  # Initialising lists that define if a square is taken by X or O
 
-Closed = False
-Finished = False
-Clock = pygame.time.Clock()
+        self.x_win = False
+        self.o_win = False
+        self.turn_count = 0
 
+        self.program_closed = False
+        self.game_finished = False
+        self.clock = pygame.time.Clock()
 
-# endregion
+        self.setup()
+        # region 'GameLoop'
+        while not self.program_closed:
+            for event in pygame.event.get():
 
-# region 'Functions'
+                if event.type == pygame.QUIT:
+                    self.program_closed = True  # If the user presses the colours.RED X it closes the window
 
+            self.mouse = pygame.mouse.get_pos()  # gets position of mouse and if its been clicked
+            self.click = pygame.mouse.get_pressed()
 
-def load():
-    global PlayerCrossturn, TurnCount, active, Xsquare, Osquare, Finished, XWin, OWin
-    Finished = False
-    XWin = False
-    OWin = False
-    PlayerCrossturn = True
-    TurnCount = 0
-    active = ['TL', 'TC', 'TR', 'ML', 'MC', 'MR', 'BL', 'BC', 'BR']
-    Xsquare.clear()
-    Osquare.clear()  # Resets the variables and lists for a new game
+            # region 'Buttons'
+            x, y, w, h = 10, 10, 100, 50
+            pygame.draw.rect(self.game_display, colours.DESATURATED_RD, (x, y, w, h))
+            self.text_in_box(15, 'Play Again', colours.WHITE, (x + (w / 2)), (y + (h / 2)))
+            if x + w > self.mouse[0] > x and y + h > self.mouse[1] > y:
+                pygame.draw.rect(self.game_display, colours.RED, (x, y, w, h))
+                self.text_in_box(15, 'Play Again', colours.WHITE, (x + (w / 2)), (y + (h / 2)))
+                if self.click[0] == 1:
+                    self.setup()
 
-    gameDisplay.fill(colours.Colour.beige)  # Rebuilds the window
-    textinbox(100, 'Tic Tac Toe', colours.Colour.black, 400, 50)
+            x2, y2, w2, h2, x3 = 450, 650, 300, 50, 50
+            dx, dy, dw, dh, dx2 = 450, 725, 120, 25, 630
+            if self.game_mode == "PlayerVComputer":
+                pygame.draw.rect(self.game_display, colours.GREY, (x2, y2, w2, h2))
+                self.text_in_box(15, "Player V Computer", colours.BLACK, (x2 + (w2 / 2)), (y2 + (h2 / 2)))
 
-    pygame.draw.rect(gameDisplay, colours.Colour.desatBlack, (325, 200, 5, 400))  # Vertical Lines
-    pygame.draw.rect(gameDisplay, colours.Colour.desatBlack, (475, 200, 5, 400))
+                if self.difficulty == "Hard":
+                    self.button(dx, dy, dw, dh, colours.DESATURATED_GRN, colours.GREEN, "Easy", "Easy",
+                                colours.BLACK)  # Displays Easy Button to be selected
+                    pygame.draw.rect(self.game_display, colours.GREY,
+                                     (dx2, dy, dw, dh))  # Makes the Hard Button invalid
+                    self.text_in_box(15, "Hard", colours.BLACK, (dx2 + (dw / 2)), (dy + (dh / 2)))
 
-    pygame.draw.rect(gameDisplay, colours.Colour.black, (200, 325, 400, 5))  # Horizontal Lines
-    pygame.draw.rect(gameDisplay, colours.Colour.black, (200, 475, 400, 5))
+                elif self.difficulty == "Easy":
+                    self.button(dx2, dy, dw, dh, colours.RED, colours.DESATURATED_RD, "Hard", "Hard",
+                                colours.BLACK)  # Displays Hard Button
+                    pygame.draw.rect(self.game_display, colours.GREY,
+                                     (dx, dy, dw, dh))  # Makes the Easy Button invalid
+                    self.text_in_box(15, "Easy", colours.BLACK, (dx + (dw / 2)), (dy + (dh / 2)))
 
-    pygame.display.update()  # draws the board and refreshes the window
-
-
-def text_objects(text, font, colour):
-    textSurface = font.render(text, True, colour)  # defines the colour of the text
-    return textSurface, textSurface.get_rect()
-
-
-def textinbox(size, text, colour, width, height):
-    textFont = pygame.font.SysFont("centurygothic", size)  # size and font of text
-    textSurf, textRect = text_objects(text, textFont, colour)  # variables to run the text functions
-    textRect.center = (width, height)  # finds the center of the surface so that text is centralised
-    gameDisplay.blit(textSurf, textRect)
-
-
-def button(x, y, w, h, ic, ac, function, text, colour):
-    global gameMode, difficulty
-    mouse = pygame.mouse.get_pos()
-    click = pygame.mouse.get_pressed()
-    if x + w > mouse[0] > x and y + h > mouse[1] > y:  # if the cursor is hovering over the button
-        pygame.draw.rect(gameDisplay, ac, (x, y, w, h))  # highlights the button
-        textinbox(15, text, colour, (x + (w / 2)), (y + (h / 2)))
-        if click[0] == 1:  # if right mouse button is pressed
-            if function == "1V1" or function == "PlayerVComputer":
-                gameMode = function
             else:
-                difficulty = function
-    else:
-        pygame.draw.rect(gameDisplay, ic, (x, y, w, h))
-        textinbox(15, text, colour, (x + (w / 2)), (y + (h / 2)))  # Draws button if cursor is NOT on button
+                self.button(x2, y2, w2, h2, colours.BLUE, colours.LIGHT_BLU, "PlayerVComputer",
+                            "Player V Computer",
+                            colours.WHITE)
 
+            if self.game_mode == "1V1":
+                pygame.draw.rect(self.game_display, colours.GREY, (x3, y2, w2, h2))
+                self.text_in_box(15, "1 V 1", colours.BLACK, (x3 + (w2 / 2)), (y2 + (h2 / 2)))
 
-def grid(x, y, w, h, ic, ac, pos):  # Function for grid buttons specifically
-    global PlayerCrossturn, TurnCount, mouse, click
+                pygame.draw.rect(self.game_display, colours.BEIGE, (dx, dy, dw, dh))
+                pygame.draw.rect(self.game_display, colours.BEIGE, (dx2, dy, dw, dh))
+            else:
+                self.button(x3, y2, w2, h2, colours.RED, colours.DESATURATED_RD, "1V1", "1 V 1",
+                            colours.BLACK)
+            # endregion
+            if not self.game_finished:
+                # Draws the rectangles for the buttons | Format (x1, y1, width, height, initial colour,
+                # highlighted colour, Name in active_grid list)
+                self.grid(position.LEFT, position.TOP, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'TL')
+                self.grid(position.CENTRE, position.TOP, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'TC')  # TOP Layer
+                self.grid(position.RIGHT, position.TOP, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'TR')
 
-    if x + w > mouse[0] > x and y + h > mouse[1] > y and pos in active:
-        pygame.draw.rect(gameDisplay, ac, (x, y, w, h))
-        if click[0] == 1 and PlayerCrossturn:
-            active.remove(pos)
-            Xsquare.append(pos)
-            cross(x, y, w, h)
-            PlayerCrossturn = False
-            TurnCount += 1
+                self.grid(position.LEFT, position.MIDDLE, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'ML')
+                self.grid(position.CENTRE, position.MIDDLE, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'MC')  # MIDDLE Layer
+                self.grid(position.RIGHT, position.MIDDLE, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'MR')
 
-        elif click[0] == 1 and not PlayerCrossturn:
-            active.remove(pos)
-            Osquare.append(pos)
-            naught(x, y, w, h)
-            PlayerCrossturn = True
-            TurnCount += 1
+                self.grid(position.LEFT, position.BOTTOM, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'BL')
+                self.grid(position.CENTRE, position.BOTTOM, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'BC')  # BOTTOM Layer
+                self.grid(position.RIGHT, position.BOTTOM, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'BR')
 
-    elif pos in active:
-        pygame.draw.rect(gameDisplay, ic, (x, y, w, h))
+                if self.turn_count >= 5:
+                    self.has_x_won()
+                    self.has_o_won()
+                    self.is_draw()
 
+                if self.game_mode == "PlayerVComputer" and not self.game_finished:
+                    if not self.is_cross_turn and self.turn_count < 9:
+                        if self.difficulty == "Easy":
+                            self.easy_move()
+                        else:
+                            self.best_move()  # Gets the best possible O pick
+                        self.active_grid.remove(self.pick)
+                        self.o_square.append(self.pick)
+                        self.naught(self.grid_positions[self.pick]["x_pos"], self.grid_positions[self.pick]["y_pos"],
+                                    position.WIDTH,
+                                    position.HEIGHT)  # Turns the Pick into a O square
+                        self.is_cross_turn = True
+                        self.turn_count += 1
 
-def cross(x, y, w, h):
-    pygame.draw.rect(gameDisplay, colours.Colour.desatgreen, (x, y, w, h))
-    width = x + (w / 2)
-    height = y + (h / 2)
-    textinbox(50, 'X', colours.Colour.black, width, height)
+            pygame.display.update()
+            self.clock.tick(60)
 
+        # endregion
+        pygame.quit()
+        quit()
 
-def naught(x, y, w, h):
-    pygame.draw.rect(gameDisplay, colours.Colour.red, (x, y, w, h))
-    width = x + (w / 2)
-    height = y + (h / 2)
-    textinbox(50, 'O', colours.Colour.black, width, height)
+        # endregion
 
+        # region 'Functions'
 
-# region 'Check for end'
+    def setup(self):
+        # global is_cross_turn, turn_count, active_grid, x_square, o_square, game_finished, x_win, o_win
+        self.game_finished = False
+        self.x_win = False
+        self.o_win = False
+        self.is_cross_turn = True
+        self.turn_count = 0
+        self.active_grid = ['TL', 'TC', 'TR', 'ML', 'MC', 'MR', 'BL', 'BC', 'BR']
+        self.x_square.clear()
+        self.o_square.clear()  # Resets the variables and lists for a new game
 
+        self.game_display.fill(colours.BEIGE)  # Rebuilds the window
+        self.text_in_box(100, 'Tic Tac Toe', colours.BLACK, 400, 50)
 
-def checkX():
-    global XWin, Finished, positions
-    for letter in positions:  # Loops through every letter in positions
-        y = 0  # Resets y if 3 of the same letter isnt found
-        for i in Xsquare:  # for every square in Xsquare
-            if letter in i:  # If position of sqauare contains the letter
-                y += 1
+        pygame.draw.rect(self.game_display, colours.DESATURATED_BLK, (325, 200, 5, 400))  # Vertical Lines
+        pygame.draw.rect(self.game_display, colours.DESATURATED_BLK, (475, 200, 5, 400))
 
-        if y == 3:
-            XWin = True
+        pygame.draw.rect(self.game_display, colours.BLACK, (200, 325, 400, 5))  # Horizontal Lines
+        pygame.draw.rect(self.game_display, colours.BLACK, (200, 475, 400, 5))
 
-    if ('TL' in Xsquare and 'MC' in Xsquare and 'BR' in Xsquare) or (
-            'TR' in Xsquare and 'MC' in Xsquare and 'BL' in Xsquare):  # Checks Diagonal Lines
-        XWin = True
+        pygame.display.update()  # draws the board and refreshes the window
 
-    if XWin:
-        textinbox(40, 'X Wins', colours.Colour.black, 400, 150)
-        Finished = True
+    def text_objects(self, text, font, colour):
+        text_surface = font.render(text, True, colour)  # defines the colour of the text
+        return text_surface, text_surface.get_rect()
 
+    def text_in_box(self, size, text, colour, width, height):
+        text_font = pygame.font.SysFont("centurygothic", size)  # size and font of text
+        text_surf, text_rect = self.text_objects(text, text_font, colour)  # variables to run the text functions
+        text_rect.center = (width, height)  # finds the center of the surface so that text is centralised
+        self.game_display.blit(text_surf, text_rect)
 
-def checkO():
-    global OWin, Finished, positions
-    for letter in positions:
-        y = 0
-        for i in Osquare:
-            if letter in i:
-                y += 1
-
-        if y == 3:
-            OWin = True
-
-    if ('TL' in Osquare and 'MC' in Osquare and 'BR' in Osquare) or (
-            'TR' in Osquare and 'MC' in Osquare and 'BL' in Osquare):  # Checks Diagonal Lines
-        OWin = True
-
-    if OWin:
-        textinbox(40, 'O Wins', colours.Colour.black, 400, 150)
-        Finished = True
-
-
-def checkDraw():
-    global Finished
-    if not XWin and not OWin:
-        if TurnCount >= 9:
-            textinbox(40, 'Draw', colours.Colour.black, 400, 150)
-            Finished = True
-
-
-# endregion
-
-# region 'Finding the best move'
-
-
-def WinBlock():
-    global Xsquare, Osqaure, pick, active, posone, postwo, posthree
-    positions = ["T", "M", "B", ["L", "C", "R"]]
-    x = 0  # index number for positions list
-    posone = ""
-    postwo = ""  # Declares the search variables
-    posthree = ""
-
-    for timesLooped in range(9):  # loops for every possibility i.e. 3x vertical, 3x horizontal, 2x diagonal
-        if timesLooped == 0 or timesLooped == 1 or timesLooped == 2:  # Searches Vertical
-            posone = positions[x] + positions[3][0]
-            postwo = positions[x] + positions[3][1]
-            posthree = positions[x] + positions[3][2]
-        elif timesLooped == 3 or timesLooped == 4 or timesLooped == 5:  # Searches Horizontal
-            posone = positions[0] + positions[3][x]
-            postwo = positions[1] + positions[3][x]
-            posthree = positions[2] + positions[3][x]
-        elif timesLooped == 6:  # Searches Top - Bottom Diagonal
-            posone = "TL"
-            postwo = "MC"
-            posthree = "BR"
-        elif timesLooped == 7:  # Searches Bottom - Top Diagonal
-            posone = "TR"
-            postwo = "MC"
-            posthree = "BL"
-        else:
-            pick = None
-            break
-
-        if (posone in Osquare and postwo in Osquare and posthree in active) or (
-                posone in Xsquare and postwo in Xsquare and posthree in active):  # Checks if two of the positions are taken by X and if the third is still available
-            pick = posthree  # Picks the third position to block the win
-            break  # breaks the Loop as the best pick has been found
-        elif (postwo in Osquare and posthree in Osquare and posone in active) or (
-                postwo in Xsquare and posthree in Xsquare and posone in active):
-            pick = posone
-            break
-        elif (posthree in Osquare and posone in Osquare and postwo in active) or (
-                posthree in Xsquare and posone in Xsquare and postwo in active):
-            pick = postwo
-            break
-        else:
-            x += 1  # Increments the index number meaning the positions searched will change
-            if x > 2:  # Resets the index number if search continues through to the next stage
-                x = 0
-
-
-def cornerPick():
-    global pick, active, Osquare
-    corners = [["TL", "TR"], ["BR", "BL"]]
-    for x in range(2):
-        if corners[0][x] in Osquare and corners[1][x] in active:
-            pick = corners[1][x]
-        elif corners[1][x] in Osquare and corners[0][x] in active:
-            pick = corners[0][x]
-
-
-def bestMove():
-    global pick, active
-    WinBlock()
-    if pick is None:
-        if "MC" in active:
-            pick = "MC"
-        else:
-            cornerPick()
-
-    if pick is None:
-        pick = random.choice(active)
-
-
-def easyMove():
-    global pick, active
-    if "MC" in active:
-        pick = "MC"
-    else:
-        pick = random.choice(active)
-
-
-# endregion
-# endregion
-load()
-# region 'GameLoop'
-while not Closed:
-    for event in pygame.event.get():
-
-        if event.type == pygame.QUIT:
-            Closed = True  # If the user presses the colours.Colour.red X it closes the window
-
-    mouse = pygame.mouse.get_pos()  # gets position of mouse and if its been clicked
-    click = pygame.mouse.get_pressed()
-
-    # region 'Buttons'
-    x, y, w, h = 10, 10, 100, 50
-    pygame.draw.rect(gameDisplay, colours.Colour.desatRed, (x, y, w, h))
-    textinbox(15, 'Play Again', colours.Colour.white, (x + (w / 2)), (y + (h / 2)))
-    if x + w > mouse[0] > x and y + h > mouse[1] > y:
-        pygame.draw.rect(gameDisplay, colours.Colour.red, (x, y, w, h))
-        textinbox(15, 'Play Again', colours.Colour.white, (x + (w / 2)), (y + (h / 2)))
-        if click[0] == 1:
-            load()
-
-    x2, y2, w2, h2, x3 = 450, 650, 300, 50, 50
-    dx, dy, dw, dh, dx2 = 450, 725, 120, 25, 630
-    if gameMode == "PlayerVComputer":
-        pygame.draw.rect(gameDisplay, colours.Colour.grey, (x2, y2, w2, h2))
-        textinbox(15, "Player V Computer", colours.Colour.black, (x2 + (w2 / 2)), (y2 + (h2 / 2)))
-
-        if difficulty == "Hard":
-            button(dx, dy, dw, dh, colours.Colour.desatgreen, colours.Colour.darkgreen, "Easy", "Easy",
-                   colours.Colour.black)  # Displays Easy Button to be selected
-            pygame.draw.rect(gameDisplay, colours.Colour.grey, (dx2, dy, dw, dh))  # Makes the Hard Button invalid
-            textinbox(15, "Hard", colours.Colour.black, (dx2 + (dw / 2)), (dy + (dh / 2)))
-
-        elif difficulty == "Easy":
-            button(dx2, dy, dw, dh, colours.Colour.red, colours.Colour.desatRed, "Hard", "Hard",
-                   colours.Colour.black)  # Displays Hard Button
-            pygame.draw.rect(gameDisplay, colours.Colour.grey, (dx, dy, dw, dh))  # Makes the Easy Button invalid
-            textinbox(15, "Easy", colours.Colour.black, (dx + (dw / 2)), (dy + (dh / 2)))
-
-    else:
-        button(x2, y2, w2, h2, colours.Colour.blue, colours.Colour.lightblue, "PlayerVComputer", "Player V Computer",
-               colours.Colour.white)
-
-    if gameMode == "1V1":
-        pygame.draw.rect(gameDisplay, colours.Colour.grey, (x3, y2, w2, h2))
-        textinbox(15, "1 V 1", colours.Colour.black, (x3 + (w2 / 2)), (y2 + (h2 / 2)))
-
-        pygame.draw.rect(gameDisplay, colours.Colour.beige, (dx, dy, dw, dh))
-        pygame.draw.rect(gameDisplay, colours.Colour.beige, (dx2, dy, dw, dh))
-    else:
-        button(x3, y2, w2, h2, colours.Colour.red, colours.Colour.desatRed, "1V1", "1 V 1", colours.Colour.black)
-    # endregion
-    if not Finished:
-        # Draws the rectangles for the buttons | Format (x1, y1, width, height, initial colour, highlighted colour, Name in active list)
-        grid(position.Left, position.Top, position.Width, position.Height, colours.Colour.desatBlack,
-             colours.Colour.black, 'TL')
-        grid(position.Centre, position.Top, position.Width, position.Height, colours.Colour.desatBlack,
-             colours.Colour.black, 'TC')  # Top Layer
-        grid(position.Right, position.Top, position.Width, position.Height, colours.Colour.desatBlack,
-             colours.Colour.black, 'TR')
-
-        grid(position.Left, position.Middle, position.Width, position.Height, colours.Colour.desatBlack,
-             colours.Colour.black, 'ML')
-        grid(position.Centre, position.Middle, position.Width, position.Height, colours.Colour.desatBlack,
-             colours.Colour.black, 'MC')  # Middle Layer
-        grid(position.Right, position.Middle, position.Width, position.Height, colours.Colour.desatBlack,
-             colours.Colour.black, 'MR')
-
-        grid(position.Left, position.Bottom, position.Width, position.Height, colours.Colour.desatBlack,
-             colours.Colour.black, 'BL')
-        grid(position.Centre, position.Bottom, position.Width, position.Height, colours.Colour.desatBlack,
-             colours.Colour.black, 'BC')  # Bottom Layer
-        grid(position.Right, position.Bottom, position.Width, position.Height, colours.Colour.desatBlack,
-             colours.Colour.black, 'BR')
-
-        if TurnCount >= 5:
-            checkX()
-            checkO()
-            checkDraw()
-
-        if gameMode == "PlayerVComputer" and not Finished:
-            if not PlayerCrossturn and TurnCount < 9:
-                if difficulty == "Easy":
-                    easyMove()
+    def button(self, x, y, w, h, ic, ac, function, text, colour):
+        # global game_mode, difficulty
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+        if x + w > mouse[0] > x and y + h > mouse[1] > y:  # if the cursor is hovering over the button
+            pygame.draw.rect(self.game_display, ac, (x, y, w, h))  # highlights the button
+            self.text_in_box(15, text, colour, (x + (w / 2)), (y + (h / 2)))
+            if click[0] == 1:  # if right mouse button is pressed
+                if function == "1V1" or function == "PlayerVComputer":
+                    self.game_mode = function
                 else:
-                    bestMove()  # Gets the best possible O pick
-                active.remove(pick)
-                Osquare.append(pick)
-                naught(GridData[pick]["Xpos"], GridData[pick]["Ypos"], position.Width,
-                       position.Height)  # Turns the Pick into a O square
-                PlayerCrossturn = True
-                TurnCount += 1
+                    self.difficulty = function
+        else:
+            pygame.draw.rect(self.game_display, ic, (x, y, w, h))
+            self.text_in_box(15, text, colour, (x + (w / 2)), (y + (h / 2)))  # Draws button if cursor is NOT on button
 
-    pygame.display.update()
-    Clock.tick(60)
+    def grid(self, x, y, w, h, ic, ac, pos):  # Function for grid buttons specifically
+        # global is_cross_turn, turn_count, mouse, click
 
-# endregion
-pygame.quit()
-quit()
+        if x + w > self.mouse[0] > x and y + h > self.mouse[1] > y and pos in self.active_grid:
+            pygame.draw.rect(self.game_display, ac, (x, y, w, h))
+            if self.click[0] == 1 and self.is_cross_turn:
+                self.active_grid.remove(pos)
+                self.x_square.append(pos)
+                self.cross(x, y, w, h)
+                self.is_cross_turn = False
+                self.turn_count += 1
+
+            elif self.click[0] == 1 and not self.is_cross_turn:
+                self.active_grid.remove(pos)
+                self.o_square.append(pos)
+                self.naught(x, y, w, h)
+                self.is_cross_turn = True
+                self.turn_count += 1
+
+        elif pos in self.active_grid:
+            pygame.draw.rect(self.game_display, ic, (x, y, w, h))
+
+    def cross(self, x, y, w, h):
+        pygame.draw.rect(self.game_display, colours.DESATURATED_GRN, (x, y, w, h))
+        width = x + (w / 2)
+        height = y + (h / 2)
+        self.text_in_box(50, 'X', colours.BLACK, width, height)
+
+    def naught(self, x, y, w, h):
+        pygame.draw.rect(self.game_display, colours.RED, (x, y, w, h))
+        width = x + (w / 2)
+        height = y + (h / 2)
+        self.text_in_box(50, 'O', colours.BLACK, width, height)
+
+        # region 'Check for end'
+
+    def has_x_won(self):
+        # global x_win, game_finished, positions
+        for letter in self.positions:  # Loops through every letter in positions
+            y = 0  # Resets y if 3 of the same letter isn't found
+            for i in self.x_square:  # for every square in x_square
+                if letter in i:  # If position of square contains the letter
+                    y += 1
+
+            if y == 3:
+                self.x_win = True
+
+        if ('TL' in self.x_square and 'MC' in self.x_square and 'BR' in self.x_square) or (
+                'TR' in self.x_square and 'MC' in self.x_square and 'BL' in self.x_square):  # Checks Diagonal Lines
+            self.x_win = True
+
+        if self.x_win:
+            self.text_in_box(40, 'X Wins', colours.BLACK, 400, 150)
+            self.game_finished = True
+
+    def has_o_won(self):
+        # global o_win, game_finished, positions
+        for letter in self.positions:
+            y = 0
+            for i in self.o_square:
+                if letter in i:
+                    y += 1
+
+            if y == 3:
+                self.o_win = True
+
+        if ('TL' in self.o_square and 'MC' in self.o_square and 'BR' in self.o_square) or (
+                'TR' in self.o_square and 'MC' in self.o_square and 'BL' in self.o_square):  # Checks Diagonal Lines
+            self.o_win = True
+
+        if self.o_win:
+            self.text_in_box(40, 'O Wins', colours.BLACK, 400, 150)
+            self.game_finished = True
+
+    def is_draw(self):
+        # global game_finished
+        if not self.x_win and not self.o_win:
+            if self.turn_count >= 9:
+                self.text_in_box(40, 'Draw', colours.BLACK, 400, 150)
+                self.game_finished = True
+
+        # endregion
+
+        # region 'Finding the best move'
+
+    def block_win(self):
+        # global x_square, o_square, pick, active_grid, pos_one, pos_two, pos_three
+        positions = ["T", "M", "B", ["L", "C", "R"]]
+        x = 0  # index number for positions list
+
+        for timesLooped in range(9):  # loops for every possibility i.e. 3x vertical, 3x horizontal, 2x diagonal
+            if timesLooped == 0 or timesLooped == 1 or timesLooped == 2:  # Searches Vertical
+                pos_one = positions[x] + positions[3][0]
+                pos_two = positions[x] + positions[3][1]
+                pos_three = positions[x] + positions[3][2]
+            elif timesLooped == 3 or timesLooped == 4 or timesLooped == 5:  # Searches Horizontal
+                pos_one = positions[0] + positions[3][x]
+                pos_two = positions[1] + positions[3][x]
+                pos_three = positions[2] + positions[3][x]
+            elif timesLooped == 6:  # Searches TOP - BOTTOM Diagonal
+                pos_one = "TL"
+                pos_two = "MC"
+                pos_three = "BR"
+            elif timesLooped == 7:  # Searches BOTTOM - TOP Diagonal
+                pos_one = "TR"
+                pos_two = "MC"
+                pos_three = "BL"
+            else:
+                self.pick = None
+                break
+
+            if (pos_one in self.o_square and pos_two in self.o_square and pos_three in self.active_grid) or (
+                    pos_one in self.x_square and pos_two in self.x_square and pos_three in self.active_grid):
+                # Checks if two of the positions are taken by X and if the third is still available
+                self.pick = pos_three  # Picks the third position to block the win
+                break  # breaks the Loop as the best pick has been found
+            elif (pos_two in self.o_square and pos_three in self.o_square and pos_one in self.active_grid) or (
+                    pos_two in self.x_square and pos_three in self.x_square and pos_one in self.active_grid):
+                self.pick = pos_one
+                break
+            elif (pos_three in self.o_square and pos_one in self.o_square and pos_two in self.active_grid) or (
+                    pos_three in self.x_square and pos_one in self.x_square and pos_two in self.active_grid):
+                self.pick = pos_two
+                break
+            else:
+                x += 1  # Increments the index number meaning the positions searched will change
+                if x > 2:  # Resets the index number if search continues through to the next stage
+                    x = 0
+
+    def pick_corner(self):
+        # global pick, active_grid, o_square
+        corners = [["TL", "TR"], ["BR", "BL"]]
+        for x in range(2):
+            if corners[0][x] in self.o_square and corners[1][x] in self.active_grid:
+                self.pick = corners[1][x]
+            elif corners[1][x] in self.o_square and corners[0][x] in self.active_grid:
+                self.pick = corners[0][x]
+
+    def best_move(self):
+        # global pick, active_grid
+        self.block_win()
+        if self.pick is None:
+            if "MC" in self.active_grid:
+                self.pick = "MC"
+            else:
+                self.pick_corner()
+
+        if self.pick is None:
+            self.pick = random.choice(self.active_grid)
+
+    def easy_move(self):
+        # global pick, active_grid
+        if "MC" in self.active_grid:
+            self.pick = "MC"
+        else:
+            self.pick = random.choice(self.active_grid)
+
+        # endregion
+        # endregion
+
+
+if __name__ == "__main__":
+    TicTacToe()
