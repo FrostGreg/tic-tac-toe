@@ -23,17 +23,17 @@ class TicTacToe:
                             'BL', 'BC', 'BR']  # List of each active_grid grid piece
 
         self.grid_positions = {  # Dictionary that defines the positions of each grid square
-            "TL": {"x_pos": position.Left, "y_pos": position.Top},
-            "TC": {"x_pos": position.Centre, "y_pos": position.Top},
-            "TR": {"x_pos": position.Right, "y_pos": position.Top},
+            "TL": {"x_pos": position.LEFT, "y_pos": position.TOP},
+            "TC": {"x_pos": position.CENTRE, "y_pos": position.TOP},
+            "TR": {"x_pos": position.RIGHT, "y_pos": position.TOP},
 
-            "ML": {"x_pos": position.Left, "y_pos": position.Middle},
-            "MC": {"x_pos": position.Centre, "y_pos": position.Middle},
-            "MR": {"x_pos": position.Right, "y_pos": position.Middle},
+            "ML": {"x_pos": position.LEFT, "y_pos": position.MIDDLE},
+            "MC": {"x_pos": position.CENTRE, "y_pos": position.MIDDLE},
+            "MR": {"x_pos": position.RIGHT, "y_pos": position.MIDDLE},
 
-            "BL": {"x_pos": position.Left, "y_pos": position.Bottom},
-            "BC": {"x_pos": position.Centre, "y_pos": position.Bottom},
-            "BR": {"x_pos": position.Right, "y_pos": position.Bottom}
+            "BL": {"x_pos": position.LEFT, "y_pos": position.BOTTOM},
+            "BC": {"x_pos": position.CENTRE, "y_pos": position.BOTTOM},
+            "BR": {"x_pos": position.RIGHT, "y_pos": position.BOTTOM}
         }
 
         self.positions = ["T", "M", "B", "L", "C", "R"]
@@ -55,79 +55,79 @@ class TicTacToe:
             for event in pygame.event.get():
 
                 if event.type == pygame.QUIT:
-                    self.program_closed = True  # If the user presses the colours.Colour.red X it closes the window
+                    self.program_closed = True  # If the user presses the colours.RED X it closes the window
 
             self.mouse = pygame.mouse.get_pos()  # gets position of mouse and if its been clicked
             self.click = pygame.mouse.get_pressed()
 
             # region 'Buttons'
             x, y, w, h = 10, 10, 100, 50
-            pygame.draw.rect(self.game_display, colours.Colour.desatRed, (x, y, w, h))
-            self.text_in_box(15, 'Play Again', colours.Colour.white, (x + (w / 2)), (y + (h / 2)))
+            pygame.draw.rect(self.game_display, colours.DESATURATED_RD, (x, y, w, h))
+            self.text_in_box(15, 'Play Again', colours.WHITE, (x + (w / 2)), (y + (h / 2)))
             if x + w > self.mouse[0] > x and y + h > self.mouse[1] > y:
-                pygame.draw.rect(self.game_display, colours.Colour.red, (x, y, w, h))
-                self.text_in_box(15, 'Play Again', colours.Colour.white, (x + (w / 2)), (y + (h / 2)))
+                pygame.draw.rect(self.game_display, colours.RED, (x, y, w, h))
+                self.text_in_box(15, 'Play Again', colours.WHITE, (x + (w / 2)), (y + (h / 2)))
                 if self.click[0] == 1:
                     self.setup()
 
             x2, y2, w2, h2, x3 = 450, 650, 300, 50, 50
             dx, dy, dw, dh, dx2 = 450, 725, 120, 25, 630
             if self.game_mode == "PlayerVComputer":
-                pygame.draw.rect(self.game_display, colours.Colour.grey, (x2, y2, w2, h2))
-                self.text_in_box(15, "Player V Computer", colours.Colour.black, (x2 + (w2 / 2)), (y2 + (h2 / 2)))
+                pygame.draw.rect(self.game_display, colours.GREY, (x2, y2, w2, h2))
+                self.text_in_box(15, "Player V Computer", colours.BLACK, (x2 + (w2 / 2)), (y2 + (h2 / 2)))
 
                 if self.difficulty == "Hard":
-                    self.button(dx, dy, dw, dh, colours.Colour.desatgreen, colours.Colour.darkgreen, "Easy", "Easy",
-                                colours.Colour.black)  # Displays Easy Button to be selected
-                    pygame.draw.rect(self.game_display, colours.Colour.grey,
+                    self.button(dx, dy, dw, dh, colours.DESATURATED_GRN, colours.GREEN, "Easy", "Easy",
+                                colours.BLACK)  # Displays Easy Button to be selected
+                    pygame.draw.rect(self.game_display, colours.GREY,
                                      (dx2, dy, dw, dh))  # Makes the Hard Button invalid
-                    self.text_in_box(15, "Hard", colours.Colour.black, (dx2 + (dw / 2)), (dy + (dh / 2)))
+                    self.text_in_box(15, "Hard", colours.BLACK, (dx2 + (dw / 2)), (dy + (dh / 2)))
 
                 elif self.difficulty == "Easy":
-                    self.button(dx2, dy, dw, dh, colours.Colour.red, colours.Colour.desatRed, "Hard", "Hard",
-                                colours.Colour.black)  # Displays Hard Button
-                    pygame.draw.rect(self.game_display, colours.Colour.grey,
+                    self.button(dx2, dy, dw, dh, colours.RED, colours.DESATURATED_RD, "Hard", "Hard",
+                                colours.BLACK)  # Displays Hard Button
+                    pygame.draw.rect(self.game_display, colours.GREY,
                                      (dx, dy, dw, dh))  # Makes the Easy Button invalid
-                    self.text_in_box(15, "Easy", colours.Colour.black, (dx + (dw / 2)), (dy + (dh / 2)))
+                    self.text_in_box(15, "Easy", colours.BLACK, (dx + (dw / 2)), (dy + (dh / 2)))
 
             else:
-                self.button(x2, y2, w2, h2, colours.Colour.blue, colours.Colour.lightblue, "PlayerVComputer",
+                self.button(x2, y2, w2, h2, colours.BLUE, colours.LIGHT_BLU, "PlayerVComputer",
                             "Player V Computer",
-                            colours.Colour.white)
+                            colours.WHITE)
 
             if self.game_mode == "1V1":
-                pygame.draw.rect(self.game_display, colours.Colour.grey, (x3, y2, w2, h2))
-                self.text_in_box(15, "1 V 1", colours.Colour.black, (x3 + (w2 / 2)), (y2 + (h2 / 2)))
+                pygame.draw.rect(self.game_display, colours.GREY, (x3, y2, w2, h2))
+                self.text_in_box(15, "1 V 1", colours.BLACK, (x3 + (w2 / 2)), (y2 + (h2 / 2)))
 
-                pygame.draw.rect(self.game_display, colours.Colour.beige, (dx, dy, dw, dh))
-                pygame.draw.rect(self.game_display, colours.Colour.beige, (dx2, dy, dw, dh))
+                pygame.draw.rect(self.game_display, colours.BEIGE, (dx, dy, dw, dh))
+                pygame.draw.rect(self.game_display, colours.BEIGE, (dx2, dy, dw, dh))
             else:
-                self.button(x3, y2, w2, h2, colours.Colour.red, colours.Colour.desatRed, "1V1", "1 V 1",
-                            colours.Colour.black)
+                self.button(x3, y2, w2, h2, colours.RED, colours.DESATURATED_RD, "1V1", "1 V 1",
+                            colours.BLACK)
             # endregion
             if not self.game_finished:
                 # Draws the rectangles for the buttons | Format (x1, y1, width, height, initial colour,
                 # highlighted colour, Name in active_grid list)
-                self.grid(position.Left, position.Top, position.Width, position.Height, colours.Colour.desatBlack,
-                          colours.Colour.black, 'TL')
-                self.grid(position.Centre, position.Top, position.Width, position.Height, colours.Colour.desatBlack,
-                          colours.Colour.black, 'TC')  # Top Layer
-                self.grid(position.Right, position.Top, position.Width, position.Height, colours.Colour.desatBlack,
-                          colours.Colour.black, 'TR')
+                self.grid(position.LEFT, position.TOP, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'TL')
+                self.grid(position.CENTRE, position.TOP, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'TC')  # TOP Layer
+                self.grid(position.RIGHT, position.TOP, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'TR')
 
-                self.grid(position.Left, position.Middle, position.Width, position.Height, colours.Colour.desatBlack,
-                          colours.Colour.black, 'ML')
-                self.grid(position.Centre, position.Middle, position.Width, position.Height, colours.Colour.desatBlack,
-                          colours.Colour.black, 'MC')  # Middle Layer
-                self.grid(position.Right, position.Middle, position.Width, position.Height, colours.Colour.desatBlack,
-                          colours.Colour.black, 'MR')
+                self.grid(position.LEFT, position.MIDDLE, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'ML')
+                self.grid(position.CENTRE, position.MIDDLE, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'MC')  # MIDDLE Layer
+                self.grid(position.RIGHT, position.MIDDLE, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'MR')
 
-                self.grid(position.Left, position.Bottom, position.Width, position.Height, colours.Colour.desatBlack,
-                          colours.Colour.black, 'BL')
-                self.grid(position.Centre, position.Bottom, position.Width, position.Height, colours.Colour.desatBlack,
-                          colours.Colour.black, 'BC')  # Bottom Layer
-                self.grid(position.Right, position.Bottom, position.Width, position.Height, colours.Colour.desatBlack,
-                          colours.Colour.black, 'BR')
+                self.grid(position.LEFT, position.BOTTOM, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'BL')
+                self.grid(position.CENTRE, position.BOTTOM, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'BC')  # BOTTOM Layer
+                self.grid(position.RIGHT, position.BOTTOM, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
+                          colours.BLACK, 'BR')
 
                 if self.turn_count >= 5:
                     self.has_x_won()
@@ -143,8 +143,8 @@ class TicTacToe:
                         self.active_grid.remove(self.pick)
                         self.o_square.append(self.pick)
                         self.naught(self.grid_positions[self.pick]["x_pos"], self.grid_positions[self.pick]["y_pos"],
-                                    position.Width,
-                                    position.Height)  # Turns the Pick into a O square
+                                    position.WIDTH,
+                                    position.HEIGHT)  # Turns the Pick into a O square
                         self.is_cross_turn = True
                         self.turn_count += 1
 
@@ -170,14 +170,14 @@ class TicTacToe:
         self.x_square.clear()
         self.o_square.clear()  # Resets the variables and lists for a new game
 
-        self.game_display.fill(colours.Colour.beige)  # Rebuilds the window
-        self.text_in_box(100, 'Tic Tac Toe', colours.Colour.black, 400, 50)
+        self.game_display.fill(colours.BEIGE)  # Rebuilds the window
+        self.text_in_box(100, 'Tic Tac Toe', colours.BLACK, 400, 50)
 
-        pygame.draw.rect(self.game_display, colours.Colour.desatBlack, (325, 200, 5, 400))  # Vertical Lines
-        pygame.draw.rect(self.game_display, colours.Colour.desatBlack, (475, 200, 5, 400))
+        pygame.draw.rect(self.game_display, colours.DESATURATED_BLK, (325, 200, 5, 400))  # Vertical Lines
+        pygame.draw.rect(self.game_display, colours.DESATURATED_BLK, (475, 200, 5, 400))
 
-        pygame.draw.rect(self.game_display, colours.Colour.black, (200, 325, 400, 5))  # Horizontal Lines
-        pygame.draw.rect(self.game_display, colours.Colour.black, (200, 475, 400, 5))
+        pygame.draw.rect(self.game_display, colours.BLACK, (200, 325, 400, 5))  # Horizontal Lines
+        pygame.draw.rect(self.game_display, colours.BLACK, (200, 475, 400, 5))
 
         pygame.display.update()  # draws the board and refreshes the window
 
@@ -230,16 +230,16 @@ class TicTacToe:
             pygame.draw.rect(self.game_display, ic, (x, y, w, h))
 
     def cross(self, x, y, w, h):
-        pygame.draw.rect(self.game_display, colours.Colour.desatgreen, (x, y, w, h))
+        pygame.draw.rect(self.game_display, colours.DESATURATED_GRN, (x, y, w, h))
         width = x + (w / 2)
         height = y + (h / 2)
-        self.text_in_box(50, 'X', colours.Colour.black, width, height)
+        self.text_in_box(50, 'X', colours.BLACK, width, height)
 
     def naught(self, x, y, w, h):
-        pygame.draw.rect(self.game_display, colours.Colour.red, (x, y, w, h))
+        pygame.draw.rect(self.game_display, colours.RED, (x, y, w, h))
         width = x + (w / 2)
         height = y + (h / 2)
-        self.text_in_box(50, 'O', colours.Colour.black, width, height)
+        self.text_in_box(50, 'O', colours.BLACK, width, height)
 
         # region 'Check for end'
 
@@ -259,7 +259,7 @@ class TicTacToe:
             self.x_win = True
 
         if self.x_win:
-            self.text_in_box(40, 'X Wins', colours.Colour.black, 400, 150)
+            self.text_in_box(40, 'X Wins', colours.BLACK, 400, 150)
             self.game_finished = True
 
     def has_o_won(self):
@@ -278,14 +278,14 @@ class TicTacToe:
             self.o_win = True
 
         if self.o_win:
-            self.text_in_box(40, 'O Wins', colours.Colour.black, 400, 150)
+            self.text_in_box(40, 'O Wins', colours.BLACK, 400, 150)
             self.game_finished = True
 
     def is_draw(self):
         # global game_finished
         if not self.x_win and not self.o_win:
             if self.turn_count >= 9:
-                self.text_in_box(40, 'Draw', colours.Colour.black, 400, 150)
+                self.text_in_box(40, 'Draw', colours.BLACK, 400, 150)
                 self.game_finished = True
 
         # endregion
@@ -306,11 +306,11 @@ class TicTacToe:
                 pos_one = positions[0] + positions[3][x]
                 pos_two = positions[1] + positions[3][x]
                 pos_three = positions[2] + positions[3][x]
-            elif timesLooped == 6:  # Searches Top - Bottom Diagonal
+            elif timesLooped == 6:  # Searches TOP - BOTTOM Diagonal
                 pos_one = "TL"
                 pos_two = "MC"
                 pos_three = "BR"
-            elif timesLooped == 7:  # Searches Bottom - Top Diagonal
+            elif timesLooped == 7:  # Searches BOTTOM - TOP Diagonal
                 pos_one = "TR"
                 pos_two = "MC"
                 pos_three = "BL"
