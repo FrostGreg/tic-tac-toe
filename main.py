@@ -40,12 +40,8 @@ class TicTacToe:
         self.x_square = []
         self.o_square = []  # Initialising lists that define if a square is taken by X or O
 
-        self.x_win = False
-        self.o_win = False
+        self.x_win = self.o_win = self.program_closed = self.game_finished = False
         self.turn_count = 0
-
-        self.program_closed = False
-        self.game_finished = False
         self.clock = pygame.time.Clock()
 
         self.setup()
@@ -73,20 +69,23 @@ class TicTacToe:
             if self.game_mode == "PlayerVComputer":
                 pygame.draw.rect(self.game_display, colours.GREY, (x2, y2, w2, h2))
                 self.text_in_box(15, "Player V Computer", colours.BLACK, (x2 + (w2 / 2)), (y2 + (h2 / 2)))
-
                 if self.difficulty == "Hard":
-                    self.button(dx, dy, dw, dh, colours.DESATURATED_GRN, colours.GREEN, "Easy", "Easy",
-                                colours.BLACK)  # Displays Easy Button to be selected
-                    pygame.draw.rect(self.game_display, colours.GREY,
-                                     (dx2, dy, dw, dh))  # Makes the Hard Button invalid
-                    self.text_in_box(15, "Hard", colours.BLACK, (dx2 + (dw / 2)), (dy + (dh / 2)))
+                    x_pos = dx
+                    other_x = dx2
+                    initial_clr = colours.DESATURATED_GRN
+                    hover_clr = colours.GREEN
+                    text = "Easy"
 
-                elif self.difficulty == "Easy":
-                    self.button(dx2, dy, dw, dh, colours.RED, colours.DESATURATED_RD, "Hard", "Hard",
-                                colours.BLACK)  # Displays Hard Button
-                    pygame.draw.rect(self.game_display, colours.GREY,
-                                     (dx, dy, dw, dh))  # Makes the Easy Button invalid
-                    self.text_in_box(15, "Easy", colours.BLACK, (dx + (dw / 2)), (dy + (dh / 2)))
+                else:
+                    x_pos = dx2
+                    other_x = dx
+                    initial_clr = colours.RED
+                    hover_clr = colours.DESATURATED_RD
+                    text = "Hard"
+
+                self.button(x_pos, dy, dw, dh, initial_clr, hover_clr, text, text, colours.BLACK)
+                pygame.draw.rect(self.game_display, colours.GREY, (other_x, dy, dw, dh))
+                self.text_in_box(15, self.difficulty, colours.BLACK, (other_x + (dw / 2)), (dy + (dh / 2)))
 
             else:
                 self.button(x2, y2, w2, h2, colours.BLUE, colours.LIGHT_BLU, "PlayerVComputer",
@@ -106,26 +105,9 @@ class TicTacToe:
             if not self.game_finished:
                 # Draws the rectangles for the buttons | Format (x1, y1, width, height, initial colour,
                 # highlighted colour, Name in active_grid list)
-                self.grid(position.LEFT, position.TOP, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
-                          colours.BLACK, 'TL')
-                self.grid(position.CENTRE, position.TOP, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
-                          colours.BLACK, 'TC')  # TOP Layer
-                self.grid(position.RIGHT, position.TOP, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
-                          colours.BLACK, 'TR')
-
-                self.grid(position.LEFT, position.MIDDLE, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
-                          colours.BLACK, 'ML')
-                self.grid(position.CENTRE, position.MIDDLE, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
-                          colours.BLACK, 'MC')  # MIDDLE Layer
-                self.grid(position.RIGHT, position.MIDDLE, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
-                          colours.BLACK, 'MR')
-
-                self.grid(position.LEFT, position.BOTTOM, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
-                          colours.BLACK, 'BL')
-                self.grid(position.CENTRE, position.BOTTOM, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
-                          colours.BLACK, 'BC')  # BOTTOM Layer
-                self.grid(position.RIGHT, position.BOTTOM, position.WIDTH, position.HEIGHT, colours.DESATURATED_BLK,
-                          colours.BLACK, 'BR')
+                for i in self.grid_positions:
+                    self.grid(self.grid_positions[i]["x_pos"], self.grid_positions[i]["y_pos"], position.WIDTH,
+                              position.HEIGHT, colours.DESATURATED_BLK, colours.BLACK, i)
 
                 if self.turn_count >= 5:
                     self.has_player_won("X")
